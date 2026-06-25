@@ -7,7 +7,7 @@ from discord.ext import commands
 
 TOKEN = os.getenv("TOKEN")
 
-ANON_CHANNEL_ID = 1519593563178926150
+ANON_CHANNEL_ID = 1519620992014745621
 NICK_FILE = "anon_nicks.json"
 
 intents = discord.Intents.default()
