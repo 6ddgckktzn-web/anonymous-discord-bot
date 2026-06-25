@@ -119,7 +119,7 @@ async def on_message(message):
         pass
 
     await message.channel.send(
-        f"{nickname}\n\n{message.content}"
+        f"{nickname}\n{message.content}"
     )
 
 bot.run(TOKEN)
