@@ -1,7 +1,6 @@
 import os
 import json
 import random
-import asyncio
 import discord
 from discord.ext import commands
 
@@ -9,6 +8,7 @@ TOKEN = os.getenv("TOKEN")
 
 ANON_CHANNEL_ID = 1519620992014745621
 NICK_FILE = "anon_nicks.json"
+WEBHOOK_NAME = "익명게시판봇"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -48,6 +48,15 @@ def get_user_nick(user_id):
 
     return data[uid]
 
+async def get_or_create_webhook(channel):
+    webhooks = await channel.webhooks()
+
+    for webhook in webhooks:
+        if webhook.name == WEBHOOK_NAME:
+            return webhook
+
+    return await channel.create_webhook(name=WEBHOOK_NAME)
+
 @bot.event
 async def on_ready():
     print(f"{bot.user} 로그인 완료!")
@@ -65,29 +74,31 @@ async def on_message(message):
     files = []
     for attachment in message.attachments:
         try:
-            file = await attachment.to_file()
-            files.append(file)
+            files.append(await attachment.to_file())
         except Exception as e:
             print("첨부파일 변환 실패:", e)
+
+    content = message.content if message.content else None
 
     try:
         await message.delete()
     except Exception as e:
         print("원본 메시지 삭제 실패:", e)
 
-    bot_member = message.guild.me
+    if not content and not files:
+        return
 
     try:
-        await bot_member.edit(nick=nickname)
-        await asyncio.sleep(0.7)
+        webhook = await get_or_create_webhook(message.channel)
+
+        await webhook.send(
+            content=content,
+            username=nickname,
+            files=files,
+            wait=True
+        )
+
     except Exception as e:
-        print("봇 닉네임 변경 실패:", e)
-
-    content = message.content if message.content else None
-
-    if files:
-        await message.channel.send(content=content, files=files)
-    else:
-        await message.channel.send(content=content)
+        print("Webhook 전송 실패:", e)
 
 bot.run(TOKEN)
