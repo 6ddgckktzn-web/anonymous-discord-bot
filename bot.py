@@ -9,7 +9,7 @@ from discord import app_commands
 TOKEN = os.getenv("TOKEN")
 
 ANON_CHANNEL_ID = 1519593563178926150
-LOG_CHANNEL_ID = 0  # 로그 채널 ID 넣기. 안 쓸 거면 0
+LOG_CHANNEL_ID = 1519618833860526110
 
 NICK_FILE = "anon_nicks.json"
 MESSAGE_FILE = "anon_messages.json"
@@ -47,6 +47,7 @@ def get_user_nick(user_id):
             nick = create_random_nick()
             if nick not in data.values():
                 break
+
         data[uid] = nick
         save_json(NICK_FILE, data)
 
@@ -87,19 +88,14 @@ def get_reply_nick(message):
     return info.get("nickname")
 
 async def send_log(message, nickname):
-    if LOG_CHANNEL_ID == 0:
-        return
-
     log_channel = bot.get_channel(LOG_CHANNEL_ID)
     if not log_channel:
         return
 
-    attachment_names = []
-    for a in message.attachments:
-        attachment_names.append(a.filename)
+    attachment_names = [a.filename for a in message.attachments]
 
     log_text = (
-        f"🗑️ 익명 메시지 삭제/재전송 로그\n"
+        "🗑️ 익명 메시지 로그\n"
         f"실제 유저: {message.author} / {message.author.id}\n"
         f"익명닉: {nickname}\n"
         f"내용: {message.content if message.content else '(내용 없음)'}"
@@ -128,7 +124,10 @@ async def change_nick(interaction: discord.Interaction, 닉네임: str):
         await interaction.response.send_message("❌ 이미 사용 중인 닉네임이야!", ephemeral=True)
         return
 
-    await interaction.response.send_message(f"✨ 익명 닉네임이 `{닉네임}` 으로 변경됐어!", ephemeral=True)
+    await interaction.response.send_message(
+        f"✨ 익명 닉네임이 `{닉네임}` 으로 변경됐어!",
+        ephemeral=True
+    )
 
 @bot.tree.command(name="랜덤닉변", description="익명 닉네임을 랜덤으로 변경합니다.")
 async def random_nick(interaction: discord.Interaction):
@@ -142,7 +141,10 @@ async def random_nick(interaction: discord.Interaction):
     data[str(interaction.user.id)] = nickname
     save_json(NICK_FILE, data)
 
-    await interaction.response.send_message(f"✨ 새 익명 닉네임: `{nickname}`", ephemeral=True)
+    await interaction.response.send_message(
+        f"✨ 새 익명 닉네임: `{nickname}`",
+        ephemeral=True
+    )
 
 @bot.event
 async def on_message(message):
@@ -189,7 +191,11 @@ async def on_message(message):
         except Exception as e:
             print("봇 닉네임 변경 실패:", e)
 
-        sent = await message.channel.send(content=content if content else None, files=files)
+        sent = await message.channel.send(
+            content=content if content else None,
+            files=files
+        )
+
         save_message_map(sent.id, message.author.id, nickname)
 
 bot.run(TOKEN)
