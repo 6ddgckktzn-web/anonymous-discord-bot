@@ -62,6 +62,14 @@ async def on_message(message):
 
     nickname = get_user_nick(message.author.id)
 
+    files = []
+    for attachment in message.attachments:
+        try:
+            file = await attachment.to_file()
+            files.append(file)
+        except Exception as e:
+            print("첨부파일 변환 실패:", e)
+
     try:
         await message.delete()
     except Exception as e:
@@ -75,6 +83,11 @@ async def on_message(message):
     except Exception as e:
         print("봇 닉네임 변경 실패:", e)
 
-    await message.channel.send(message.content)
+    content = message.content if message.content else None
+
+    if files:
+        await message.channel.send(content=content, files=files)
+    else:
+        await message.channel.send(content=content)
 
 bot.run(TOKEN)
