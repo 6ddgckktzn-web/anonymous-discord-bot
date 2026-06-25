@@ -118,8 +118,21 @@ async def on_message(message):
     except:
         pass
 
-    await message.channel.send(
-        f"{nickname}\n{message.content}"
-    )
+    guild = message.guild
+bot_member = guild.me
+
+old_nick = bot_member.nick
+
+try:
+    await bot_member.edit(nick=nickname)
+except Exception as e:
+    print("봇 닉네임 변경 실패:", e)
+
+await message.channel.send(message.content)
+
+try:
+    await bot_member.edit(nick=old_nick)
+except Exception as e:
+    print("봇 닉네임 복구 실패:", e)
 
 bot.run(TOKEN)
