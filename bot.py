@@ -60,8 +60,9 @@ async def get_or_create_webhook(channel):
 
 @bot.event
 async def on_ready():
+    bot.tree.clear_commands(guild=None)
     await bot.tree.sync()
-    print(f"{bot.user} 로그인 완료!")
+    print(f"{bot.user} 명령어 초기화 완료!")
 
 @bot.tree.command(name="닉변경", description="봇의 서버 닉네임을 변경합니다.")
 @app_commands.describe(닉네임="새로운 봇 닉네임")
