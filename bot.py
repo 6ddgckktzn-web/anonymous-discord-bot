@@ -24,7 +24,7 @@ def load_data():
     try:
         with open(NICK_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    except:
+    except Exception:
         return {}
 
 def save_data(data):
@@ -60,9 +60,8 @@ async def get_or_create_webhook(channel):
 
 @bot.event
 async def on_ready():
-    bot.tree.clear_commands(guild=None)
     await bot.tree.sync()
-    print(f"{bot.user} 명령어 초기화 완료!")
+    print(f"{bot.user} 로그인 완료!")
 
 @bot.tree.command(name="닉변경", description="봇의 서버 닉네임을 변경합니다.")
 @app_commands.describe(닉네임="새로운 봇 닉네임")
@@ -83,6 +82,7 @@ async def bot_nick_change(interaction: discord.Interaction, 닉네임: str):
 
     try:
         await interaction.guild.me.edit(nick=닉네임)
+
         await interaction.response.send_message(
             f"✅ 봇 닉네임을 **{닉네임}**(으)로 변경했어요!",
             ephemeral=True
@@ -96,6 +96,7 @@ async def bot_nick_change(interaction: discord.Interaction, 닉네임: str):
 
     except Exception as e:
         print("봇 닉네임 변경 실패:", e)
+
         await interaction.response.send_message(
             "❌ 오류가 발생했습니다.",
             ephemeral=True
