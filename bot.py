@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -67,18 +68,13 @@ async def on_message(message):
         print("원본 메시지 삭제 실패:", e)
 
     bot_member = message.guild.me
-    old_nick = bot_member.nick
 
     try:
         await bot_member.edit(nick=nickname)
+        await asyncio.sleep(0.7)
     except Exception as e:
         print("봇 닉네임 변경 실패:", e)
 
     await message.channel.send(message.content)
-
-    try:
-        await bot_member.edit(nick=old_nick)
-    except Exception as e:
-        print("봇 닉네임 복구 실패:", e)
 
 bot.run(TOKEN)
